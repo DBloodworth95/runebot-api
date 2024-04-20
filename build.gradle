@@ -3,19 +3,43 @@ plugins {
     id 'maven-publish'
 }
 
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/SkylerPIlot/RBEVPmvn")
+            credentials {
+                username = "DBloodworth95"
+                password = ""
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId = 'com.example'
+            artifactId = 'rbapi'
+            version = '1.7.8'
+
+            from(components.java)
+        }
+    }
+}
+
+
 repositories {
     mavenLocal()
     maven {
         url = 'https://repo.runelite.net'
     }
     mavenCentral()
-    jcenter()
 }
 
 def runeLiteVersion = 'latest.release'
 
 dependencies {
-    compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
+    //TODO: Add rev dependencies etc
+    /*compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
+    compileOnly group: 'net.runelite', name: 'runelite-api', version: runeLiteVersion
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
     testImplementation 'junit:junit:4.12'
@@ -23,33 +47,47 @@ dependencies {
     testImplementation group: 'net.runelite', name: 'jshell', version: runeLiteVersion
     implementation 'org.json:json:20230227'
     implementation 'org.roaringbitmap:RoaringBitmap:0.9.44'
-    implementation("com.google.archivepatcher:archive-patch-applier:1.0.4")
+    implementation("org.benf:cfr:0.152")*/
+    compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    implementation 'org.json:json:20230227'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+    implementation 'org.roaringbitmap:RoaringBitmap:0.9.44'
     implementation("org.benf:cfr:0.152")
+    implementation(group: "org.java-websocket", name: "Java-WebSocket", version: "1.5.2")
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
+    testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+    testImplementation 'org.roaringbitmap:RoaringBitmap:0.9.44'
+
+    //runtimeOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+    //runtimeOnly 'org.projectlombok:lombok:1.18.20'
+    runtimeOnly 'org.benf:cfr:0.152'
+
 }
 sourceSets {
     main {
-
         java {
             srcDir "src"
         }
-
     }
 }
 
 group = 'com.example'
-version = '5.4'
+version = '0.0.3'
 sourceCompatibility = "11"
-targetCompatibility = "11"
 
 task FatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'com.example.Main'
     }
-    baseName = 'EthanVannPlugins'
+    baseName = 'RuneBotAPI'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude("com/example/hidden")
-    exclude("com/example/PathingTesting")
     with jar
 }
 
@@ -57,30 +95,14 @@ task FatJarWithHidden(type: Jar) {
     manifest {
         attributes 'Main-Class': 'com.example.Main'
     }
-    baseName = 'EthanVannPlugins'
+    baseName = 'RuneBotAPI'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            credentials {
-                username 'admin'
-                password 'password'
-            }
-            url "http://baseUrl/artifactory/libs-release-local"
-        }
-    }
-}
-
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
+
 targetCompatibility = JavaVersion.VERSION_11
